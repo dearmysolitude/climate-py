@@ -60,7 +60,7 @@ class Main(QMainWindow, MainUI):
                 return
 
             self.description.setText('데이터 분석 중.')
-            self.analyzer.analyze()
+            description = self.analyzer.analyze()
             self.analyzer.render_result()
             rendered_result = self.analyzer.get_rendered_result()
 
@@ -73,7 +73,7 @@ class Main(QMainWindow, MainUI):
                         widget.deleteLater()
 
             self.qv_box.addWidget(rendered_result)
-            self.description.setText('데이터 분석 완료.')  # 여기에 분석 결과에 대한 설명을 세팅할 수 있다.
+            self.description.setText(f'데이터 분석 완료.\n{description}')  # 여기에 분석 결과에 대한 설명을 세팅할 수 있다.
         except Exception as e:
             print(e)
             print(traceback.format_exc())

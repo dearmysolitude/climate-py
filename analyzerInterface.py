@@ -5,6 +5,7 @@ class AnalyzerInterface(ABC):
     def __init__(self):
         self.df = None
         self.rendered_result = None
+        self.description = None
 
     @abstractmethod
     def setup_data(self):
