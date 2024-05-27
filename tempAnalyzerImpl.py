@@ -171,11 +171,12 @@ class TempLevelAnalyzer(AnalyzerInterface):
             model.add(Dense(1))
             model.compile(loss='mean_squared_error', optimizer='adam')
 
+            # 실제로 돌려볼 때에는 훈련/저장은 생략
             # 모델 훈련
-            model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=100, batch_size=1, verbose=1)
+            # model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=100, batch_size=1, verbose=1)
 
             # 모델 저장
-            model.save('./temp_ai/gru_temp_model.h5')
+            # model.save('./temp_ai/gru_temp_model.h5')
 
             # 모델 불러오기
             model = load_model('./temp_ai/gru_temp_model.h5')
