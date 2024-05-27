@@ -9,6 +9,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsView, QGraphicsScene, QVBoxLayout
 from PyQt5.QtGui import QPixmap
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from co2AnalyzerImpl import CO2LevelAnalyzer
 from tempAnalyzerImpl import TempLevelAnalyzer
@@ -23,6 +24,7 @@ MainUI = uic.loadUiType(os.path.join(root, 'ui/main.ui'))[0]
 class Main(QMainWindow, MainUI):
     def __init__(self):
         super().__init__()
+        self.nav_toolbar = None
         self.analyzer = None
         self.qv_box = None
         try:
@@ -75,6 +77,12 @@ class Main(QMainWindow, MainUI):
                     if widget:
                         widget.deleteLater()
 
+            if not hasattr(self, 'nav_toolbar') or self.nav_toolbar is None:
+                self.nav_toolbar = NavigationToolbar(rendered_result, self)
+            else:
+                self.nav_toolbar.canvas = rendered_result
+
+            self.addToolBar(self.nav_toolbar)
             self.qv_box.addWidget(rendered_result)
             self.description.setText(f'데이터 분석 완료.\n{description}')  # 여기에 분석 결과에 대한 설명을 세팅할 수 있다.
         except Exception as e:
