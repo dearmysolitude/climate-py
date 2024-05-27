@@ -10,8 +10,9 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsView, QGraphicsS
 from PyQt5.QtGui import QPixmap
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from analyzerImpl import CO2LevelAnalyzer
+from co2AnalyzerImpl import CO2LevelAnalyzer
 from tempAnalyzerImpl import TempLevelAnalyzer
+from sealevelAnalyzerImpl import SeaLevelAnalyzer
 
 matplotlib.use('Qt5Agg')
 root = os.path.dirname(os.path.abspath(__file__))
@@ -50,7 +51,7 @@ class Main(QMainWindow, MainUI):
         elif self.radioButton_2.isChecked():
             self.analyzer = CO2LevelAnalyzer()
         elif self.radioButton_3.isChecked():
-            self.analyzer = CO2LevelAnalyzer()  # 바뀔 예정
+            self.analyzer = SeaLevelAnalyzer()  # 바뀔 예정
         elif self.radioButton_4.isChecked():
             self.analyzer = CO2LevelAnalyzer()  # 바뀔 예정
 
