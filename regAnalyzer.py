@@ -1,5 +1,5 @@
 import traceback
-
+import numpy as np
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 import pandas as pd
 from matplotlib.figure import Figure
@@ -21,44 +21,62 @@ class RegAnalyzer(AnalyzerInterface):
         try:
 
             # 데이터 불러오기
-            df1 = pd.read_csv('./data/서울연평균.csv', encoding='cp949')
-            df2 = pd.read_csv('./data/co2연평균.csv', encoding='cp949')
-            # print(df1)
-            # print(df2)
-            df1.rename(columns={'일시': 'year', '평균기온(°C)': 'temperature'}, inplace=True)
-            df2.rename(columns={'ann inc': 'ann'}, inplace=True)
-            # print(df1)
+            self.df1 = pd.read_csv('./data/서울연평균.csv', encoding='cp949')
+            self.df2 = pd.read_csv('./data/co2연평균.csv', encoding='cp949')
+            # print(self.df1)
+            # print(self.df2)
+            self.df1.rename(columns={'일시': 'year', '평균기온(°C)': 'temperature'}, inplace=True)
+            self.df2.rename(columns={'ann inc': 'ann'}, inplace=True)
+            # print(self.df1)
+            # print(self.df2)
 
             # 데이터 병합
-            merged_df = pd.merge(df1, df2, on=['year'])
+            self.merged_df = pd.merge(self.df1, self.df2, on=['year'])
 
             # 필요한 컬럼 선택
-            merged_df = merged_df[['temperature', 'ann', 'mean', 'mean_gl']]
+            self.merged_df = self.merged_df[['temperature', 'ann', 'mean', 'mean_gl']]
+            print(self.merged_df)
+            self.merged_df.dropna(inplace=True)
 
-            # 결측치 제거
-            merged_df.dropna(inplace=True)
+            # # 결측치 제거
+            # self.merged_df.drop(columns=['unc', '지점', '지점명', 'year', '평균최저기온(°C)', '평균최고기온(°C)'], inplace=True)
+            # self.merged_df.dropna(inplace=True)
+            # print(self.merged_df)
+            # print(self.merged_df.shape)
+            #
+            # # merged_df.rename(columns={'평균기온(°C)': 'temperature'}, inplace=True)
+            # fit = ols('temperature ~ ann', data=self.merged_df).fit()
+            # print(fit.summary())
 
-            # 회귀분석 수행
-            fit = ols('temperature ~ ann + mean + mean_gl', data=merged_df).fit()
-            print(fit.summary())
+
+            # 회귀선을 포함한 산점도 그리기
+            # sns.lmplot(x='temperature', y='ann', data=self.merged_df)
+            # plt.title('Scatter plot with regression line')
+            # plt.xlabel('Temperature')
+            # plt.ylabel('Average')
+            # plt.show()
+
+            # # 회귀분석 수행
+            # fit = ols('temperature ~ ann + mean + mean_gl', data=merged_df).fit()
+            # print(fit.summary())
 
             # 각 독립 변수와 종속 변수 사이의 산점도와 회귀선 시각화
-            fig, axs = plt.subplots(2, 2, figsize=(12, 10))
-
-            # ann
-            sns.regplot(x='ann', y='temperature', data=merged_df, ax=axs[0, 0])
-            axs[0, 0].set_title('Scatter plot with regression line (ann)')
-
-            # mean
-            sns.regplot(x='mean', y='temperature', data=merged_df, ax=axs[0, 1])
-            axs[0, 1].set_title('Scatter plot with regression line (mean)')
-
-            # mean_gl
-            sns.regplot(x='mean_gl', y='temperature', data=merged_df, ax=axs[1, 0])
-            axs[1, 0].set_title('Scatter plot with regression line (mean_gl)')
-
-            plt.tight_layout()
-            plt.show()
+            # fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+            #
+            # # ann
+            # sns.regplot(x='ann', y='temperature', data=merged_df, ax=axs[0, 0])
+            # axs[0, 0].set_title('Scatter plot with regression line (ann)')
+            #
+            # # mean
+            # sns.regplot(x='mean', y='temperature', data=merged_df, ax=axs[0, 1])
+            # axs[0, 1].set_title('Scatter plot with regression line (mean)')
+            #
+            # # mean_gl
+            # sns.regplot(x='mean_gl', y='temperature', data=merged_df, ax=axs[1, 0])
+            # axs[1, 0].set_title('Scatter plot with regression line (mean_gl)')
+            #
+            # plt.tight_layout()
+            # plt.show()
 
 
             # # 회귀선을 포함한 산점도 그리기
@@ -100,18 +118,44 @@ class RegAnalyzer(AnalyzerInterface):
 
     def analyze(self):
         ## df으로 그림을 그려 데이터를 반환
-        pass
+        # 회귀분석 수행
+        fit = ols('temperature ~ ann + mean + mean_gl', data=self.merged_df).fit()
+        return fit.summary()
+
 
     def render_result(self):
         try:
+
+            # # 회귀선을 포함한 산점도 그리기
+            # sns.lmplot(x='ann', y='temperature', data=merged_df)
+            # plt.title('Scatter plot with regression line')
+            # plt.xlabel('CO2 Ann Increase')
+            # plt.ylabel('Temperature')
+            # plt.show()
+
+
             # Matplotlib 그래프 생성
             figure = Figure(figsize=(6, 4), dpi=100)
             canvas = FigureCanvasQTAgg(figure)
             ax = figure.add_subplot(111)
-            ax.plot(self.df['date'], self.df['value'])
-            ax.set_title('CO2 Level')
-            ax.set_xlabel('Date')
-            ax.set_ylabel('Value')
+
+            # 산점도
+            ax.scatter(self.merged_df['ann'], self.merged_df['temperature'], label='temperature')
+
+            # 회귀선 계산
+            x = self.merged_df['ann']
+            y = self.merged_df['temperature']
+            coefficients = np.polyfit(x, y, 1)  # 1차 다항식 (직선) 피팅
+            poly = np.poly1d(coefficients)
+            regression_line = poly(x)
+
+            # 회귀선 그리기
+            ax.plot(x, regression_line, color='red', label='CO2 Ann Increase')
+
+            ax.set_title('Scatter plot with regression line')
+            ax.set_xlabel('CO2 Ann Increase')
+            ax.set_ylabel('Temperature')
+            ax.legend()  # 범례 표시
 
             self.rendered_result = canvas
         except Exception as e:
